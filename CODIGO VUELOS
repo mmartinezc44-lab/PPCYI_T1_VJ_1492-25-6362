@@ -1,0 +1,138 @@
+import xml.etree.ElementTree as ET
+
+
+# -------------------------
+# Clase Vuelo
+# -------------------------
+class Vuelo:
+    def __init__(self, codigo, origen, destino, duracion, aerolinea):
+        self.codigo = codigo
+        self.origen = origen
+        self.destino = destino
+        self.duracion = int(duracion)
+        self.aerolinea = aerolinea
+
+    def mostrar(self):
+        print(f"\nCódigo: {self.codigo}")
+        print(f"Origen: {self.origen}")
+        print(f"Destino: {self.destino}")
+        print(f"Duración: {self.duracion} horas")
+        print(f"Aerolínea: {self.aerolinea}")
+
+
+# -------------------------
+# Función para cargar XML
+# -------------------------
+def cargar_archivo(nombre_archivo):
+    vuelos = []
+    try:
+        tree = ET.parse(nombre_archivo)
+        root = tree.getroot()
+
+        for v in root.findall("vuelo"):
+            codigo = v.find("codigo").text
+            origen = v.find("origen").text
+            destino = v.find("destino").text
+            duracion = v.find("duracion").text
+            aerolinea = v.find("aerolinea").text
+
+            vuelo = Vuelo(codigo, origen, destino, duracion, aerolinea)
+            vuelos.append(vuelo)
+
+        print("\nArchivo cargado correctamente.")
+    except:
+        print("\nError al cargar el archivo.")
+
+    return vuelos
+
+
+# -------------------------
+# Buscar vuelo específico
+# -------------------------
+def detalle_vuelo(vuelos):
+    codigo = input("Ingrese el código del vuelo: ")
+
+    for vuelo in vuelos:
+        if vuelo.codigo == codigo:
+            vuelo.mostrar()
+            return
+
+    print("Vuelo no encontrado.")
+
+
+# -------------------------
+# Agrupar por aerolínea
+# -------------------------
+def agrupar_por_aerolinea(vuelos):
+    grupos = {}
+
+    for vuelo in vuelos:
+        if vuelo.aerolinea not in grupos:
+            grupos[vuelo.aerolinea] = []
+        grupos[vuelo.aerolinea].append(vuelo)
+
+    for aerolinea, lista in grupos.items():
+        print(f"\nAerolínea: {aerolinea}")
+        for vuelo in lista:
+            print(f"  - {vuelo.codigo} ({vuelo.origen} -> {vuelo.destino})")
+
+
+# -------------------------
+# Ordenar por duración
+# -------------------------
+def ordenar_por_duracion(vuelos):
+    vuelos_ordenados = sorted(vuelos, key=lambda x: x.duracion, reverse=True)
+
+    print("\nVuelos ordenados por duración (mayor a menor):")
+    for vuelo in vuelos_ordenados:
+        print(f"{vuelo.codigo} - {vuelo.duracion} horas")
+
+
+# -------------------------
+# MENÚ PRINCIPAL
+# -------------------------
+def menu():
+    vuelos = []
+
+    while True:
+        print("\n-------- MENÚ AEROLÍNEA --------")
+        print("1. Cargar Archivo")
+        print("2. Detalle de vuelo específico")
+        print("3. Agrupar vuelos por aerolínea")
+        print("4. Ordenar más duración a menor duración")
+        print("5. Salir")
+
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            nombre = input("Ingrese el nombre del archivo XML: ")
+            vuelos = cargar_archivo(nombre)
+
+        elif opcion == "2":
+            if vuelos:
+                detalle_vuelo(vuelos)
+            else:
+                print("Primero debe cargar el archivo.")
+
+        elif opcion == "3":
+            if vuelos:
+                agrupar_por_aerolinea(vuelos)
+            else:
+                print("Primero debe cargar el archivo.")
+
+        elif opcion == "4":
+            if vuelos:
+                ordenar_por_duracion(vuelos)
+            else:
+                print("Primero debe cargar el archivo.")
+
+        elif opcion == "5":
+            print("Saliendo del programa...")
+            break
+
+        else:
+            print("Opción inválida.")
+
+
+# Ejecutar programa
+menu()
